@@ -36,16 +36,15 @@ html, body, [class*="css"] {
 header[data-testid="stHeader"] { display: none !important; }
 section[data-testid="stSidebar"] { display: none !important; }
 footer { display: none !important; }
-.block-container { padding: 0 !important; max-width: 100% !important; }
-
-/* ── Top bar ── */
+.block-container { padding: 0 48px 48px 48px !important; max-width: 100% !important; }
+            
 .topbar {
   height: 90px;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
-  padding: 0 24px;
+  padding: 0 48px;
   gap: 10px;
 }
 .topbar-title {
@@ -55,14 +54,13 @@ footer { display: none !important; }
   letter-spacing: -0.01em;
 }
 
-/* ── Left panel sections ── */
 .left-section {
   padding: 16px 18px;
   border-bottom: 1px solid var(--border);
 }
 .left-section:last-child { border-bottom: none; flex: 1; }
 .section-label {
-  font-size: 10px;
+  font-size: 15px;
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -98,7 +96,6 @@ footer { display: none !important; }
   font-family: 'Geist Mono', monospace;
 }
 
-/* ── Status pill ── */
 .pill {
   display: inline-flex;
   align-items: center;
@@ -113,7 +110,6 @@ footer { display: none !important; }
   border-radius: 50%;
 }
 
-/* ── Right panel output blocks ── */
 .out-block {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -150,7 +146,6 @@ footer { display: none !important; }
   font-family: 'Geist Mono', monospace;
 }
 
-/* ── Streamlit widgets ── */
 textarea {
   background: var(--bg) !important;
   color: var(--text) !important;
@@ -185,55 +180,19 @@ textarea:focus {
   color: var(--text) !important;
 }
 .stButton > button[kind="primary"] {
-  background: var(--accent) !important;
-  border-color: var(--accent) !important;
-  color: #fff !important;
-  font-weight: 600 !important;
-  box-shadow: 0 2px 12px rgba(99,102,241,0.3) !important;
+  background: #2d2d44;
+  color: white;
+  font-weight: 600;
+  border: 1px solid rgba(255,255,255,0.2);
 }
+
 .stButton > button[kind="primary"]:hover {
-  background: #7577f3 !important;
-  box-shadow: 0 4px 18px rgba(99,102,241,0.4) !important;
-}
+  background: #38385a;
+}        
 .stButton > button:disabled {
   opacity: 0.35 !important;
 }
 
-[data-testid="stDataFrame"] {
-  background: var(--bg) !important;
-  border: none !important;
-  border-radius: 0 !important;
-}
-[data-testid="stDataFrame"] th {
-  background: var(--raised) !important;
-  color: var(--text-dim) !important;
-  font-family: 'Geist', sans-serif !important;
-  font-size: 10px !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  border-bottom: 1px solid var(--border) !important;
-  padding: 6px 12px !important;
-}
-[data-testid="stDataFrame"] td {
-  color: var(--text) !important;
-  font-family: 'Geist Mono', monospace !important;
-  font-size: 12px !important;
-  border-bottom: 1px solid var(--border) !important;
-  padding: 5px 12px !important;
-}
-[data-testid="stDataFrame"] tr:hover td {
-  background: var(--raised) !important;
-}
-
-label { display: none !important; }
-p { color: var(--text-mid) !important; font-size: 12px !important; }
-h1,h2,h3 { color: var(--text) !important; font-family: 'Geist', sans-serif !important; }
-
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #52525b; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -306,22 +265,15 @@ def do_step():
     })
     return True
 
-loaded  = st.session_state.is_loaded
-pc_val  = st.session_state.datapath.pc
-cyc_val = st.session_state.cycle
-
 st.markdown(f"""
 <div class="topbar">
   <span class="topbar-title">MIPS Simulation Program</span>
-  <div class="topbar-badge">
-    <span style="color:#3f3f46;">·</span>
-    <span>Cycle&nbsp;<b style="color:#fafafa;">{cyc_val}</b></span>
-    <span style="color:#3f3f46;">·</span>
-    <span style="color:{'#22c55e' if loaded else '#f59e0b'};">
-    </span>
-  </div>
 </div>
 """, unsafe_allow_html=True)
+
+loaded  = st.session_state.is_loaded
+pc_val  = st.session_state.datapath.pc
+cyc_val = st.session_state.cycle
 
 left_col, right_col = st.columns([1.1, 2.6], gap="small")
 
@@ -336,33 +288,17 @@ with left_col:
 
     st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
 
-    loaded_count = None
     if st.button("Assemble & Load", type="primary", use_container_width=True):
-        loaded_count = load_code(asm_input)
+        load_code(asm_input)
+        st.rerun()
 
     st.markdown("<div style='height:5px'></div>", unsafe_allow_html=True)
 
-    b1, b2 = st.columns(2)
-    with b1:
-        step_clicked = st.button("Step →", disabled=not loaded, use_container_width=True)
-
-    if loaded_count is not None:
-        st.markdown(
-            f'<div style="margin-top:8px;display:flex;align-items:center;gap:6px;'
-            f'background:var(--green-d);border:1px solid rgba(34,197,94,0.25);'
-            f'border-radius:7px;padding:7px 10px;font-size:11.5px;color:#22c55e;'
-            f'font-family:\'Geist Mono\',monospace;">'
-            f'✓ &nbsp;{loaded_count} instruction(s) loaded</div>',
-            unsafe_allow_html=True,
-        )
-    for r in [r for r in st.session_state.history if r.get("Cycle") == "-"]:
-        st.markdown(
-            f'<div style="margin-top:6px;background:rgba(239,68,68,0.08);'
-            f'border:1px solid rgba(239,68,68,0.25);border-radius:7px;'
-            f'padding:7px 10px;font-size:11px;color:#ef4444;'
-            f'font-family:\'Geist Mono\',monospace;">{r["Note"]}</div>',
-            unsafe_allow_html=True,
-        )
+    _, b_mid, _ = st.columns([1, 2, 1])
+with b_mid:
+    if st.button("Step →", disabled=not st.session_state.is_loaded, use_container_width=True):
+        do_step()
+        st.rerun()
 
     st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
 
@@ -380,8 +316,6 @@ with left_col:
     </div>
     """, unsafe_allow_html=True)
 
-if step_clicked: do_step()
-
 with right_col:
     st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
 
@@ -392,8 +326,8 @@ with right_col:
 
     with reg_col:
         dp = st.session_state.datapath
-        reg_rows = [{"Idx": i, "Name": dp.REG_NAME.get(i, f"R{i}"),
-                     "Dec": dp.registers[i],
+        reg_rows = [{"Index": i, "Register": dp.REG_NAME.get(i, f"R{i}"),
+                     "Value": dp.registers[i],
                      "Hex": f"0x{dp.registers[i] & 0xFFFFFFFF:08X}"}
                     for i in range(32)]
         st.markdown("""
