@@ -3,7 +3,7 @@ from memory import MipsMemory
 
 # Mapping for the Assembler
 REG_MAP = {
-    "$zero": 0, "$at": 1, "$v0": 2, "$v1": 3, "$a0": 4, "$a1": 5, "$a2": 6, "$a3": 7,
+    "$zero": 0, "$0": 0, "$at": 1, "$v0": 2, "$v1": 3, "$a0": 4, "$a1": 5, "$a2": 6, "$a3": 7, # Added $0 as alias for $zero as well in the assmebler input 
     "$t0": 8, "$t1": 9, "$t2": 10, "$t3": 11, "$t4": 12, "$t5": 13, "$t6": 14, "$t7": 15,
     "$s0": 16, "$s1": 17, "$s2": 18, "$s3": 19, "$s4": 20, "$s5": 21, "$s6": 22, "$s7": 23,
     "$t8": 24, "$t9": 25, "$ra": 31
@@ -65,9 +65,21 @@ def get_type_instruction(parts, REG_FUNCT, REG_MAP):
 
     elif instr_name in REG_FUNCT['I_type']:
         s['op'] = REG_FUNCT['I_type'][instr_name][0]
-        s['rs'] = REG_MAP[parts[2]]
-        s['rt'] = REG_MAP[parts[1]]
-        s['constant'] = int(parts[3])
+
+        if instr_name in ('lw', 'sw'):
+            # Format: lw $rt, offset($rs)  e.g. lw $s0, 4($zero)
+            # parts[1] = $rt, parts[2] = offset($rs)
+            mem_operand = parts[2]                        # e.g. "4($zero)" or "0($zero)"
+            offset_str, base = mem_operand.split('(')     # "4", "$zero)"
+            base = base.rstrip(')')                       # "$zero"
+            s['rt'] = REG_MAP[parts[1]]
+            s['rs'] = REG_MAP[base]
+            s['constant'] = int(offset_str)
+        else:
+            # Format: addi $rt, $rs, immediate
+            s['rs'] = REG_MAP[parts[2]]
+            s['rt'] = REG_MAP[parts[1]]
+            s['constant'] = int(parts[3])
     
     return s
 

@@ -40,7 +40,7 @@ footer { display: none !important; }
 
 /* ── Top bar ── */
 .topbar {
-  height: 48px;
+  height: 90px;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   display: flex;
@@ -49,46 +49,10 @@ footer { display: none !important; }
   gap: 10px;
 }
 .topbar-title {
-  font-size: 13.5px;
+  font-size: 40.5px;
   font-weight: 600;
   color: var(--text);
   letter-spacing: -0.01em;
-}
-.topbar-sub {
-  font-size: 11.5px;
-  color: var(--text-dim);
-  margin-left: 2px;
-}
-.topbar-badge {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11.5px;
-  color: var(--text-mid);
-  font-family: 'Geist Mono', monospace;
-}
-
-/* ── Two-column shell ── */
-.two-col {
-  display: flex;
-  height: calc(100vh - 48px);
-}
-.col-left {
-  width: 380px;
-  min-width: 300px;
-  flex-shrink: 0;
-  background: var(--surface);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-.col-right {
-  flex: 1;
-  background: var(--bg);
-  overflow-y: auto;
-  padding: 20px 24px;
 }
 
 /* ── Left panel sections ── */
@@ -107,7 +71,6 @@ footer { display: none !important; }
   font-family: 'Geist', sans-serif;
 }
 
-/* ── Stat row ── */
 .stat-row {
   display: flex;
   gap: 8px;
@@ -350,7 +313,6 @@ cyc_val = st.session_state.cycle
 st.markdown(f"""
 <div class="topbar">
   <span class="topbar-title">MIPS Simulation Program</span>
-  <span class="topbar-sub">· Single-Cycle Datapath</span>
   <div class="topbar-badge">
     <span style="color:#3f3f46;">·</span>
     <span>Cycle&nbsp;<b style="color:#fafafa;">{cyc_val}</b></span>
@@ -383,8 +345,6 @@ with left_col:
     b1, b2 = st.columns(2)
     with b1:
         step_clicked = st.button("Step →", disabled=not loaded, use_container_width=True)
-    with b2:
-        run_clicked  = st.button("Run All", disabled=not loaded, use_container_width=True)
 
     if loaded_count is not None:
         st.markdown(
@@ -421,8 +381,6 @@ with left_col:
     """, unsafe_allow_html=True)
 
 if step_clicked: do_step()
-if run_clicked:
-    while do_step(): pass
 
 with right_col:
     st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)

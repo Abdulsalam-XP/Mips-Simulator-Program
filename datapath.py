@@ -5,13 +5,13 @@ class MipsDatapath:
         self.registers = [0] * 32
         self.pc = 0
         self.REG_NAME = {
-    0: "$zero", 1: "$at", 2: "$v0", 3: "$v1",
+    0: "$zero", 0: "$0", 1: "$at", 2: "$v0", 3: "$v1", # Added $0 as alias for $zero 
     4: "$a0", 5: "$a1", 6: "$a2", 7: "$a3",
     8: "$t0", 9: "$t1", 10: "$t2", 11: "$t3",
     12: "$t4", 13: "$t5", 14: "$t6", 15: "$t7",
     16: "$s0", 17: "$s1", 18: "$s2", 19: "$s3",
     20: "$s4", 21: "$s5", 22: "$s6", 23: "$s7",
-    24: "$t8", 25: "$t9", 31: "$ra"
+    24: "$t8", 25: "$t9", 31: "$ra",
 }
 
     # CONTROL UNIT
@@ -76,7 +76,6 @@ class MipsDatapath:
 
         return signals
 
-    
     # ALU CONTROL
     # Bin Thabit
     def alu_control(self, alu_op, funct):
@@ -104,7 +103,6 @@ class MipsDatapath:
 
         return "none"
 
-   
     # ALU
     # Bin Thabit
     def alu(self, val1, val2, control, shamt=0):
@@ -133,7 +131,6 @@ class MipsDatapath:
             res = 1 if val1 < val2 else 0
 
         return res, (1 if res == 0 else 0)
-
     
     # REGISTER FILE
     # Abdulsalam
@@ -157,7 +154,6 @@ class MipsDatapath:
     def mux(self, val1, val2, sel):
         return val2 if sel else val1
 
-    
     # ADDER
     # Alanood
     def adder(self, a, b):
