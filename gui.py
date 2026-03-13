@@ -184,14 +184,16 @@ if "history"          not in st.session_state: st.session_state.history         
 if "data_mem_history" not in st.session_state: st.session_state.data_mem_history = {}
 if "is_loaded"        not in st.session_state: st.session_state.is_loaded        = False
 if "cycle"            not in st.session_state: st.session_state.cycle            = 0
+if "start_address" not in st.session_state: st.session_state.start_address = 0
 
-def load_code(assembly_text):
+def load_code(assembly_text, start_address):
     st.session_state.memory           = MipsMemory()
     st.session_state.datapath         = MipsDatapath(st.session_state.memory)
     st.session_state.history          = []
     st.session_state.data_mem_history = {}
     st.session_state.is_loaded        = True
     st.session_state.cycle            = 0
+    st.session_state.datapath.pc = start_address
     instructions = [l.strip() for l in assembly_text.split('\n') if l.strip()]
     loaded = 0
     for i, instr in enumerate(instructions):
@@ -199,7 +201,7 @@ def load_code(assembly_text):
             parts            = decode(instr)
             type_instruction = get_type_instruction(parts, REG_FUNCT, REG_MAP)
             machine_code     = get_machine_code(type_instruction)
-            st.session_state.memory.load_initial_data(i * 4, machine_code)
+            st.session_state.memory.load_initial_data(start_address + i * 4, machine_code)
             loaded += 1
         except Exception as e:
             st.session_state.history.append({
@@ -292,6 +294,13 @@ left_column, right_column = st.columns([1.1, 2.6], gap="small")
 with left_column:
     st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
 
+    start_address = st.number_input(
+      "Starting Address (hex offset)", 
+      min_value=0, step=4, value=0,
+      label_visibility="visible"
+  )
+    st.session_state.start_address = start_address
+
     asm_input = st.text_area(
         "asm", height=260,
         placeholder="addi $t0, $zero, 5\nadd  $s0, $t0, $t1\nsw   $s0, 0($zero)\n...",
@@ -301,8 +310,8 @@ with left_column:
     st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
 
     if st.button("Assemble & Load", type="primary", use_container_width=True):
-        load_code(asm_input)
-        st.rerun()
+      load_code(asm_input, st.session_state.start_address)
+      st.rerun()
 
     st.markdown("<div style='height:5px'></div>", unsafe_allow_html=True)
 
