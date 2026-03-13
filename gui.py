@@ -185,6 +185,7 @@ if "data_mem_history" not in st.session_state: st.session_state.data_mem_history
 if "is_loaded"        not in st.session_state: st.session_state.is_loaded        = False
 if "cycle"            not in st.session_state: st.session_state.cycle            = 0
 if "start_address" not in st.session_state: st.session_state.start_address = 0
+if "wire_values" not in st.session_state: st.session_state.wire_values = {}
 
 def load_code(assembly_text, start_address):
     st.session_state.memory           = MipsMemory()
@@ -232,11 +233,37 @@ def do_step():
     next_pc = dp.pc + 4
     st.session_state.cycle += 1
 
+    # ── J / JAL ──────────────────────────────────────────────────────────
     if signals["Jump"]:
         jump_target = (next_pc & 0xF0000000) | (target << 2)
         if signals["JAL"]:
-                dp.register_file(rs, rt, 31, next_pc, 1)
+            dp.register_file(rs, rt, 31, next_pc, 1)
         dp.pc = jump_target
+        st.session_state.wire_values = {
+            "PC":           hex(current_pc),
+            "Instruction":  hex(instruction),
+            "Opcode":       hex(opcode),
+            "RS":           rs,
+            "RT":           rt,
+            "RD":           rd,
+            "Shamt":        shamt,
+            "Funct":        hex(funct),
+            "IMM":          imm,
+            "Target":       hex(target),
+            "Extended IMM": extended_imm,
+            "ALU Ctrl":     "N/A",
+            "ALU Result":   "N/A",
+            "Zero Flag":    "N/A",
+            "RegWrite":     signals["RegWrite"],
+            "MemRead":      signals["MemRead"],
+            "MemWrite":     signals["MemWrite"],
+            "ALUSrc":       signals["ALUSrc"],
+            "MemtoReg":     signals["MemtoReg"],
+            "RegDst":       signals["RegDst"],
+            "Jump":         signals["Jump"],
+            "JAL":          signals["JAL"],
+            "Branch":       signals["Branch"],
+        }
         st.session_state.history.append({
             "Cycle": st.session_state.cycle,
             "PC":    hex(current_pc),
@@ -246,11 +273,39 @@ def do_step():
         })
         return True
 
+    # ── Normal pipeline ───────────────────────────────────────────────────
     write_reg             = dp.mux(rt, rd, signals["RegDst"])
     alu_in2               = dp.mux(reg_data2, extended_imm, signals['ALUSrc'])
     alu_ctrl              = dp.alu_control(signals["ALUOp"], funct)
     alu_result, zero_flag = dp.alu(reg_data1, alu_in2, alu_ctrl, shamt)
 
+    st.session_state.wire_values = {
+        "PC":           hex(current_pc),
+        "Instruction":  hex(instruction),
+        "Opcode":       hex(opcode),
+        "RS":           rs,
+        "RT":           rt,
+        "RD":           rd,
+        "Shamt":        shamt,
+        "Funct":        hex(funct),
+        "IMM":          imm,
+        "Target":       hex(target),
+        "Extended IMM": extended_imm,
+        "ALU Ctrl":     alu_ctrl,
+        "ALU Result":   alu_result,
+        "Zero Flag":    zero_flag,
+        "RegWrite":     signals["RegWrite"],
+        "MemRead":      signals["MemRead"],
+        "MemWrite":     signals["MemWrite"],
+        "ALUSrc":       signals["ALUSrc"],
+        "MemtoReg":     signals["MemtoReg"],
+        "RegDst":       signals["RegDst"],
+        "Jump":         signals["Jump"],
+        "JAL":          signals["JAL"],
+        "Branch":       signals["Branch"],
+    }
+
+    # ── JR ───────────────────────────────────────────────────────────────
     if alu_ctrl == "jr":
         dp.pc = reg_data1
         st.session_state.history.append({
@@ -261,7 +316,7 @@ def do_step():
             "MemWr": 0,
         })
         return True
-    
+
     mem_data = 0
     if signals["MemRead"]:  mem_data = mem.read(alu_result)
     if signals["MemWrite"]:
@@ -269,7 +324,7 @@ def do_step():
         st.session_state.data_mem_history[alu_result] = reg_data2
     final_write_data = dp.mux(alu_result, mem_data, signals["MemtoReg"])
     dp.register_file(rs, rt, write_reg, final_write_data, signals["RegWrite"])
-    dp.pc += 4
+    dp.pc = next_pc
     st.session_state.history.append({
         "Cycle": st.session_state.cycle,
         "PC":    hex(current_pc),
@@ -381,3 +436,15 @@ with right_column:
                 '<div class="out-empty">— Load an SW instruction to see it appear here! —</div>',
                 unsafe_allow_html=True,
             )
+    if st.session_state.wire_values:
+      st.markdown("""
+      <div class="out-block">
+        <div class="out-header">
+          <span class="out-header-title">Datapath Wire Values</span>
+          <span class="out-header-count">Last Cycle that is Executed</span>
+        </div>
+      </div>
+      """, unsafe_allow_html=True)
+      wire_rows = [{"Wire": k, "Value": v} 
+                   for k, v in st.session_state.wire_values.items()]
+      st.dataframe(pd.DataFrame(wire_rows), use_container_width=True, hide_index=True)
