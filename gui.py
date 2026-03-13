@@ -287,9 +287,9 @@ loaded  = st.session_state.is_loaded
 pc_val  = st.session_state.datapath.pc
 cyc_val = st.session_state.cycle
 
-left_col, right_col = st.columns([1.1, 2.6], gap="small")
+left_column, right_column = st.columns([1.1, 2.6], gap="small")
 
-with left_col:
+with left_column:
     st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
 
     asm_input = st.text_area(
@@ -306,8 +306,8 @@ with left_col:
 
     st.markdown("<div style='height:5px'></div>", unsafe_allow_html=True)
 
-    _, b_mid, _ = st.columns([1, 2, 1])
-with b_mid:
+    _, middle_button, _ = st.columns([1, 2, 1])
+with middle_button:
     if st.button("Step →", disabled=not st.session_state.is_loaded, use_container_width=True):
         do_step()
         st.rerun()
@@ -328,15 +328,15 @@ with b_mid:
     </div>
     """, unsafe_allow_html=True)
 
-with right_col:
+with right_column:
     st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
 
     trace_rows = [r for r in st.session_state.history if r.get("Cycle") != "-"]
     trace_count = len(trace_rows)
 
-    reg_col, mem_col = st.columns(2, gap="medium")
+    reg_column, mem_column = st.columns(2, gap="medium")
 
-    with reg_col:
+    with reg_column:
         dp = st.session_state.datapath
         reg_rows = [{"Index": i, "Register": dp.REG_NAME.get(i, f"R{i}"),
                      "Value": dp.registers[i],
@@ -353,7 +353,7 @@ with right_col:
         st.dataframe(pd.DataFrame(reg_rows), use_container_width=True,
                      hide_index=True, height=420)
 
-    with mem_col:
+    with mem_column:
         st.markdown(f"""
         <div class="out-block">
           <div class="out-header">
