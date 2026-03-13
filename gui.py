@@ -386,7 +386,7 @@ with middle_button:
         <div class="stat-value">0x{pc_val:04X}</div>
       </div>
       <div class="stat-box">
-        <div class="stat-label">Cycle</div>
+        <div class="stat-label">Number of Cycles</div>
         <div class="stat-value">{cyc_val}</div>
       </div>
     </div>
