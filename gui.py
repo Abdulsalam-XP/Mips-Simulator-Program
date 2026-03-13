@@ -222,13 +222,44 @@ def do_step():
     shamt  = (instruction >> 6)  & 0x1F
     funct  =  instruction        & 0x3F
     imm    =  instruction        & 0xFFFF
+    target =  instruction        & 0x3FFFFFF
     signals               = dp.control_unit(opcode)
     reg_data1, reg_data2  = dp.register_file(rs, rt, 0, 0, 0, 0)
     extended_imm          = dp.sign_extend(imm)
+
+    next_pc = dp.pc + 4
+    st.session_state.cycle += 1
+
+    if signals["Jump"]:
+        jump_target = (next_pc & 0xF0000000) | (target << 2)
+        if signals["JAL"]:
+                dp.register_file(rs, rt, 31, next_pc, 1)
+        dp.pc = jump_target
+        st.session_state.history.append({
+            "Cycle": st.session_state.cycle,
+            "PC":    hex(current_pc),
+            "Instr": hex(instruction),
+            "RegWr": signals["RegWrite"],
+            "MemWr": signals["MemWrite"],
+        })
+        return True
+
     write_reg             = dp.mux(rt, rd, signals["RegDst"])
     alu_in2               = dp.mux(reg_data2, extended_imm, signals['ALUSrc'])
     alu_ctrl              = dp.alu_control(signals["ALUOp"], funct)
     alu_result, zero_flag = dp.alu(reg_data1, alu_in2, alu_ctrl, shamt)
+
+    if alu_ctrl == "jr":
+        dp.pc = reg_data1
+        st.session_state.history.append({
+            "Cycle": st.session_state.cycle,
+            "PC":    hex(current_pc),
+            "Instr": hex(instruction),
+            "RegWr": 0,
+            "MemWr": 0,
+        })
+        return True
+    
     mem_data = 0
     if signals["MemRead"]:  mem_data = mem.read(alu_result)
     if signals["MemWrite"]:
@@ -237,7 +268,6 @@ def do_step():
     final_write_data = dp.mux(alu_result, mem_data, signals["MemtoReg"])
     dp.register_file(rs, rt, write_reg, final_write_data, signals["RegWrite"])
     dp.pc += 4
-    st.session_state.cycle += 1
     st.session_state.history.append({
         "Cycle": st.session_state.cycle,
         "PC":    hex(current_pc),

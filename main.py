@@ -9,6 +9,7 @@ REG_MAP = {
     "$t8": 24, "$t9": 25, "$ra": 31
 }
 REG_FUNCT = {
+
     # R-type: [Opcode, Funct]
     "R_type": {
         "add":  [0x00, 0x20],
@@ -29,9 +30,14 @@ REG_FUNCT = {
         "lw":   [0x23],
         "sw":   [0x2B],
         "beq":  [0x04]
+    },
+
+    # J-type: [Opcode]
+    "J_type": {
+        "j":   [0x02],
+        "jal": [0x03],
     }
 }
-
 
 # Bin Thabit
 def decode(instruction_sent):
@@ -57,11 +63,20 @@ def get_type_instruction(parts, REG_FUNCT, REG_MAP):
             s['rt'] = REG_MAP[parts[2]]
             s['rd'] = REG_MAP[parts[1]]
             s['shamt'] = int(parts[3])
+        elif instr_name == 'jr':  # jr $rs (Abdulsalam)
+            s['rs'] = REG_MAP[parts[1]] # Abdulsalam
+            s['rt'] = 0 # Abdulsalam
+            s['rd'] = 0 # Abdulsalam
+            s['shamt'] = 0 # Abdulsalam
         else:  # normal R-type like add, sub
             s['rs'] = REG_MAP[parts[2]]
             s['rt'] = REG_MAP[parts[3]]
             s['rd'] = REG_MAP[parts[1]]
             s['shamt'] = 0
+
+    elif instr_name in REG_FUNCT['J_type']:
+        s['op'] = REG_FUNCT['J_type'][instr_name][0]
+        s['target'] = int(parts[1])
 
     elif instr_name in REG_FUNCT['I_type']:
         s['op'] = REG_FUNCT['I_type'][instr_name][0]
@@ -85,12 +100,14 @@ def get_type_instruction(parts, REG_FUNCT, REG_MAP):
 
 # Abdullah
 def get_machine_code(s):
-
     if s['op'] == 0:
-        machine_code = (s['op'] << 26) | (s['rs'] << 21) | (s['rt'] << 16) | (s['rd'] << 11) | (s['shamt'] << 6) | s[
-            'func']
-    elif 'rd' not in s.keys():
-
+        # R-type
+        machine_code = (s['op'] << 26) | (s['rs'] << 21) | (s['rt'] << 16) | (s['rd'] << 11) | (s['shamt'] << 6) | s['func']
+    elif 'target' in s:
+        # J-type (j, jal)
+        machine_code = (s['op'] << 26) | (s['target'] & 0x3FFFFFF) # Abdulsalam
+    else:
+        # I-type
         machine_code = (s['op'] << 26) | (s['rs'] << 21) | (s['rt'] << 16) | (s['constant'] & 0xFFFF)
     return machine_code
 
@@ -112,11 +129,25 @@ def run_simulation(memory, datapath):
         shamt  = (instruction >> 6)  & 0x1F
         funct  = instruction & 0x3F
         imm    = instruction & 0xFFFF
-        
+        target = instruction & 0x3FFFFFF 
         
         signals = datapath.control_unit(opcode)
         reg_data1, reg_data2 = datapath.register_file(rs, rt, 0, 0, 0, 0)    
         extended_imm = datapath.sign_extend(imm)
+
+        # Abdulsalam
+        next_pc = datapath.pc + 4
+        
+        # J-type: j / jal
+        if signals["Jump"]:
+            jump_target = (next_pc & 0xF0000000) | (target << 2)
+            if signals["JAL"]:
+                # Save return address in $ra (reg 31)
+                datapath.register_file(rs, rt, 31, next_pc, 1)
+            datapath.pc = jump_target
+            print(signals)
+            datapath.print_registers()
+            continue
 
         # MUX
         write_reg = datapath.mux(rt, rd, signals["RegDst"])
@@ -127,6 +158,14 @@ def run_simulation(memory, datapath):
         alu_result, zero_flag = datapath.alu(
             reg_data1, alu_in2, alu_ctrl, shamt
         )
+
+        #Abdulsalam 
+        # jr: PC = $rs
+        if alu_ctrl == "jr":
+            datapath.pc = reg_data1
+            print(signals)
+            datapath.print_registers()
+            continue
 
         # MEMORY
         mem_data = 0

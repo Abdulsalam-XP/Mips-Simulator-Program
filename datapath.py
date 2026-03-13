@@ -25,9 +25,10 @@ class MipsDatapath:
             "MemRead": 0,
             "MemWrite": 0,
             "Branch": 0,
-            # "Jump": 0,
+            "Jump": 0,
             "ALUOp": 0,
-            # "JAL": 0
+            "JAL": 0,
+            "JR": 0
         }
 
         # R-type
@@ -73,6 +74,16 @@ class MipsDatapath:
             signals["Branch"] = 1
             signals["ALUOp"] = 1   # subtraction
 
+         # j
+        elif opcode == 0x02:
+            signals["Jump"] = 1
+ 
+        # jal
+        elif opcode == 0x03:
+            signals["Jump"] = 1
+            signals["JAL"] = 1
+            signals["RegWrite"] = 1 
+
 
         return signals
 
@@ -100,6 +111,7 @@ class MipsDatapath:
             if funct == 0x27: return "nor"
             if funct == 0x00: return "sll"
             if funct == 0x2A: return "slt"
+            if funct == 0x08: return "jr"
 
         return "none"
 
