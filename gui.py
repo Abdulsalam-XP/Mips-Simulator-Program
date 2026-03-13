@@ -96,20 +96,6 @@ footer { display: none !important; }
   font-family: 'Geist Mono', monospace;
 }
 
-.pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 10px;
-  border-radius: 99px;
-  font-size: 11px;
-  font-weight: 500;
-}
-.pill-dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-}
-
 .out-block {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -156,12 +142,7 @@ textarea {
   line-height: 1.75 !important;
   resize: none !important;
 }
-textarea:focus {
-  border-color: var(--accent) !important;
-  box-shadow: 0 0 0 3px rgba(99,102,241,0.1) !important;
-  outline: none !important;
-}
-
+            
 .stButton > button {
   background: var(--raised) !important;
   border: 1px solid var(--border-hi) !important;
@@ -185,12 +166,13 @@ textarea:focus {
   font-weight: 600;
   border: 1px solid rgba(255,255,255,0.2);
 }
-
+          # Step button hover effect (only when enabled)
 .stButton > button[kind="primary"]:hover {
   background: #38385a;
 }        
+          # Disabled button hover cursor effect 
 .stButton > button:disabled {
-  opacity: 0.35 !important;
+  opacity: 0.05 !important;
 }
 
 </style>
@@ -357,6 +339,6 @@ with right_col:
                          hide_index=True, height=420)
         else:
             st.markdown(
-                '<div class="out-empty">— execute a sw instruction —</div>',
+                '<div class="out-empty">— Load an SW instruction to see it appear here! —</div>',
                 unsafe_allow_html=True,
             )
