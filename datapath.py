@@ -92,7 +92,7 @@ class MipsDatapath:
         return signals
 
     # ALU CONTROL
-    # Bin Thabit
+    # Ahmed 
     def alu_control(self, alu_op, funct):
         # Used for: addi, lw, sw
         if alu_op == 0:
@@ -121,7 +121,7 @@ class MipsDatapath:
         return "none"
 
     # ALU
-    # Bin Thabit
+    # Ahmed
     def alu(self, val1, val2, control, shamt=0):
 
         res = 0
@@ -167,13 +167,16 @@ class MipsDatapath:
         return imm - 0x10000 if imm & 0x8000 else imm
 
     # MUX (Hardware Accurate)
+    # Ahmed
     def mux(self, val1, val2, sel):
         return val2 if sel else val1
 
     # ADDER
+    # Ahmed
     def adder(self, a, b):
         return (a + b) & 0xFFFFFFFF
     
+    # Ahmed
     def print_registers(self):
         print("\n===== NON-ZERO REGISTERS =====")
         for i in range(32):

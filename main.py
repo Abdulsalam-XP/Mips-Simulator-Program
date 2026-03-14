@@ -98,6 +98,7 @@ def get_type_instruction(parts, REG_FUNCT, REG_MAP):
     
     return s
 
+# Bin Thabit
 def get_machine_code(s):
     if s['op'] == 0:
         # R-type
