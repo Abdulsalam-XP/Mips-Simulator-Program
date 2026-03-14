@@ -98,7 +98,6 @@ def get_type_instruction(parts, REG_FUNCT, REG_MAP):
     
     return s
 
-# Abdullah
 def get_machine_code(s):
     if s['op'] == 0:
         # R-type
@@ -111,7 +110,7 @@ def get_machine_code(s):
         machine_code = (s['op'] << 26) | (s['rs'] << 21) | (s['rt'] << 16) | (s['constant'] & 0xFFFF)
     return machine_code
 
-# Bin Thabit And Abdullah
+# Bin Thabit
 # 4. START THE SIMULATION
 def run_simulation(memory, datapath):
     while datapath.pc in memory.storage:
