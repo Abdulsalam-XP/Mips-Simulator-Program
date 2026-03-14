@@ -1,4 +1,4 @@
-# Abdulsalam And Abdullah
+# Abdullah
 class MipsMemory:
     def __init__(self):
        # memory storage: address -> value
