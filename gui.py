@@ -233,7 +233,6 @@ def do_step():
     next_pc = dp.pc + 4
     st.session_state.cycle += 1
 
-    # ── J / JAL ──────────────────────────────────────────────────────────
     if signals["Jump"]:
         jump_target = (next_pc & 0xF0000000) | (target << 2)
         if signals["JAL"]:
@@ -273,7 +272,6 @@ def do_step():
         })
         return True
 
-    # ── Normal pipeline ───────────────────────────────────────────────────
     write_reg             = dp.mux(rt, rd, signals["RegDst"])
     alu_in2               = dp.mux(reg_data2, extended_imm, signals['ALUSrc'])
     alu_ctrl              = dp.alu_control(signals["ALUOp"], funct)
@@ -305,7 +303,6 @@ def do_step():
         "Branch":       signals["Branch"],
     }
 
-    # ── JR ───────────────────────────────────────────────────────────────
     if alu_ctrl == "jr":
         dp.pc = reg_data1
         st.session_state.history.append({
