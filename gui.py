@@ -321,8 +321,11 @@ def do_step():
         st.session_state.data_mem_history[alu_result] = reg_data2
     final_write_data = dp.mux(alu_result, mem_data, signals["MemtoReg"])
     dp.register_file(rs, rt, write_reg, final_write_data, signals["RegWrite"])
-    dp.pc = next_pc
-    st.session_state.history.append({
+    if signals["Branch"] and zero_flag:
+      dp.pc = (next_pc + (extended_imm << 2)) & 0xFFFFFFFF
+    else:
+      dp.pc = next_pc
+      st.session_state.history.append({
         "Cycle": st.session_state.cycle,
         "PC":    hex(current_pc),
         "Instr": hex(instruction),

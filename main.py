@@ -178,7 +178,6 @@ def run_simulation(memory, datapath):
 
         print(signals)
         
-
         # WRITE BACK
         final_write_data = datapath.mux(
             alu_result, mem_data, signals["MemtoReg"]
@@ -187,7 +186,10 @@ def run_simulation(memory, datapath):
         datapath.register_file(rs, rt, write_reg, final_write_data, signals["RegWrite"])
         
         datapath.print_registers()
-        datapath.pc += 4
+        if signals["Branch"] and zero_flag:
+            datapath.pc = (next_pc + (extended_imm << 2)) & 0xFFFFFFFF
+        else:
+            datapath.pc = next_pc
 
 if __name__ == "__main__":
     # Initialize the memory and the datapath
