@@ -162,15 +162,13 @@ class MipsDatapath:
         return imm - 0x10000 if imm & 0x8000 else imm
 
     # MUX (Hardware Accurate)
-    # Alanood
     def mux(self, val1, val2, sel):
         return val2 if sel else val1
 
     # ADDER
-    # Alanood
     def adder(self, a, b):
         return (a + b) & 0xFFFFFFFF
-    # Alanood
+    
     def print_registers(self):
         print("\n===== NON-ZERO REGISTERS =====")
         for i in range(32):
