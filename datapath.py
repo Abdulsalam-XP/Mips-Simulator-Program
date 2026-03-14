@@ -1,22 +1,29 @@
 # Everyone works
 class MipsDatapath:
+    #abdullah
     def __init__(self, memory_instance):
+        # connect CPU to memory
         self.memory = memory_instance
+        # 32 registers in MIPS, all start with value 0
         self.registers = [0] * 32
         self.pc = 0
+        # register names
         self.REG_NAME = {
-    0: "$zero", 0: "$0", 1: "$at", 2: "$v0", 3: "$v1", # Added $0 as alias for $zero 
-    4: "$a0", 5: "$a1", 6: "$a2", 7: "$a3",
-    8: "$t0", 9: "$t1", 10: "$t2", 11: "$t3",
-    12: "$t4", 13: "$t5", 14: "$t6", 15: "$t7",
-    16: "$s0", 17: "$s1", 18: "$s2", 19: "$s3",
-    20: "$s4", 21: "$s5", 22: "$s6", 23: "$s7",
-    24: "$t8", 25: "$t9", 31: "$ra",
+     0:"$zero",1:"$at",2:"$v0",3:"$v1",
+    4:"$a0",5:"$a1",6:"$a2",7:"$a3",
+    8:"$t0",9:"$t1",10:"$t2",11:"$t3",
+    12:"$t4",13:"$t5",14:"$t6",15:"$t7",
+    16:"$s0",17:"$s1",18:"$s2",19:"$s3",
+    20:"$s4",21:"$s5",22:"$s6",23:"$s7",
+    24:"$t8",25:"$t9",26:"$k0",27:"$k1",
+    28:"$gp",29:"$sp",30:"$fp",31:"$ra"
 }
 
     # CONTROL UNIT
     # Abdullah
+    # decides what the CPU should do
     def control_unit(self, opcode):
+        # default control signals
         signals = {
             "RegDst": 0,
             "ALUSrc": 0,
@@ -32,54 +39,51 @@ class MipsDatapath:
         }
 
         # R-type
-        if opcode == 0x00:
+        if opcode == 0:
             signals["RegDst"] = 1
             signals["RegWrite"] = 1
             signals["ALUOp"] = 2
 
         # addi
-        elif opcode == 0x08:
+        elif opcode == 8:
             signals["ALUSrc"] = 1
             signals["RegWrite"] = 1
-            signals["ALUOp"] = 0
 
         # andi
-        elif opcode == 0x0C:
+        elif opcode == 12:
             signals["ALUSrc"] = 1
             signals["RegWrite"] = 1
             signals["ALUOp"] = 3
 
         # ori
-        elif opcode == 0x0D:
+        elif opcode == 13:
             signals["ALUSrc"] = 1
             signals["RegWrite"] = 1
             signals["ALUOp"] = 4
 
         # lw
-        elif opcode == 0x23:
+        elif opcode == 35:
             signals["ALUSrc"] = 1
             signals["MemtoReg"] = 1
             signals["RegWrite"] = 1
             signals["MemRead"] = 1
-            signals["ALUOp"] = 0   # address = base + offset
 
         # sw
-        elif opcode == 0x2B:
+        elif opcode == 43:
             signals["ALUSrc"] = 1
             signals["MemWrite"] = 1
-            signals["ALUOp"] = 0   # address = base + offset
 
         # beq
-        elif opcode == 0x04:
+        elif opcode == 4:
             signals["Branch"] = 1
-            signals["ALUOp"] = 1   # subtraction
+            signals["ALUOp"] = 1   
 
          # j
-        elif opcode == 0x02:
+        elif opcode == 2:
             signals["Jump"] = 1
  
         # jal
-        elif opcode == 0x03:
+        elif opcode == 3:
             signals["Jump"] = 1
             signals["JAL"] = 1
             signals["RegWrite"] = 1 
@@ -90,12 +94,13 @@ class MipsDatapath:
     # ALU CONTROL
     # Bin Thabit
     def alu_control(self, alu_op, funct):
-
+        # Used for: addi, lw, sw
         if alu_op == 0:
-            return "add"  # addi, lw, sw
+            return "add"  
 
+        # Used for: beq
         if alu_op == 1:
-            return "sub"  # beq
+            return "sub"  
 
         if alu_op == 3:
             return "and"
@@ -104,15 +109,15 @@ class MipsDatapath:
             return "or"
 
         if alu_op == 2:  # R-type
-            if funct == 0x20: return "add"
-            if funct == 0x22: return "sub"
-            if funct == 0x24: return "and"
-            if funct == 0x25: return "or"
-            if funct == 0x27: return "nor"
-            if funct == 0x00: return "sll"
-            if funct == 0x2A: return "slt"
-            if funct == 0x08: return "jr"
-
+            if funct == 32: return "add"
+            if funct == 34: return "sub"
+            if funct == 36: return "and"
+            if funct == 37: return "or"
+            if funct == 39: return "nor"
+            if funct == 0: return "sll"
+            if funct == 42: return "slt"
+            if funct == 8: return "jr"
+        # if no operation matches
         return "none"
 
     # ALU
