@@ -364,7 +364,7 @@ with left_column:
 
     st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
 
-    if st.button("Assemble & Load", type="primary", use_container_width=True):
+    if st.button("Assemble & Load", type="primary", width="stretch"):
       load_code(asm_input, st.session_state.start_address)
       st.rerun()
 
@@ -372,7 +372,7 @@ with left_column:
 
     _, middle_button, _ = st.columns([1, 2, 1])
 with middle_button:
-    if st.button("Step →", disabled=not st.session_state.is_loaded, use_container_width=True):
+    if st.button("Step →", disabled=not st.session_state.is_loaded, width="stretch"):
         do_step()
         st.rerun()
 
@@ -414,7 +414,7 @@ with right_column:
           </div>
         </div>
         """, unsafe_allow_html=True)
-        st.dataframe(pd.DataFrame(reg_rows), use_container_width=True,
+        st.dataframe(pd.DataFrame(reg_rows), width="stretch",
                      hide_index=True, height=420)
 
     with mem_column:
@@ -429,7 +429,7 @@ with right_column:
         if st.session_state.data_mem_history:
             dmem_rows = [{"Addr": hex(a), "Dec": v, "Hex": hex(v)}
                          for a, v in sorted(st.session_state.data_mem_history.items())]
-            st.dataframe(pd.DataFrame(dmem_rows), use_container_width=True,
+            st.dataframe(pd.DataFrame(dmem_rows), width="stretch",
                          hide_index=True, height=420)
         else:
             st.markdown(
@@ -445,6 +445,6 @@ with right_column:
         </div>
       </div>
       """, unsafe_allow_html=True)
-      wire_rows = [{"Wire": k, "Value": v} 
+      wire_rows = [{"Wire": k, "Value": str(v)} 
                    for k, v in st.session_state.wire_values.items()]
-      st.dataframe(pd.DataFrame(wire_rows), use_container_width=True, hide_index=True)
+      st.dataframe(pd.DataFrame(wire_rows), width="stretch", hide_index=True)
